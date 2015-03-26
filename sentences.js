@@ -9,78 +9,130 @@ function getRandomColor() {
   return color;
 }
 
-var nodeIterator = document.createNodeIterator(
-  // Node to use as root
-  document.getElementsByTagName('body')[0],
+// var nodeIterator = document.createNodeIterator(
+//   // Node to use as root
+//   document.getElementsByTagName('body')[0],
 
-  // Only consider nodes that are text nodes (nodeType 3)
-  NodeFilter.SHOW_ELEMENT,
+//   // Only consider nodes that are text nodes (nodeType 3)
+//   NodeFilter.SHOW_ELEMENT,
 
-  // Object containing the function to use for the acceptNode method
-  // of the NodeFilter
-    { acceptNode: function(node) {
-      // Logic to determine whether to accept, reject or skip node
-      // In this case, only accept nodes that have content
-      // other than whitespace
-      if ( ! /^\s*$/.test(node.data) ) {
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    }
-  },
-  false
-);
+//   // Object containing the function to use for the acceptNode method
+//   // of the NodeFilter
+//     { acceptNode: function(node) {
+//       // Logic to determine whether to accept, reject or skip node
+//       // In this case, only accept nodes that have content
+//       // other than whitespace
+//       if ( ! /^\s*$/.test(node.data) ) {
+//         return NodeFilter.FILTER_ACCEPT;
+//       }
+//     }
+//   },
+//   false
+// );
 
-// Show the content of every non-empty text node that is a child of root
+// // Show the content of every non-empty text node that is a child of root
 
-// var parser = new DOMParser();
+// // var parser = new DOMParser();
+// var regex = /[\.?!]+ /g;
 
-var regex = /[\.?!]+ /g;
+// while ((node = nodeIterator.nextNode())) {
+//   // split node text
+//   var sentences = node.innerText.split(regex);
 
-while ((node = nodeIterator.nextNode())) {
-  // split node text
-  var sentences = node.innerText.split(regex);
+//   if (sentences.length !== null) {
+//     var indices = [];
+//     var cutoff = 0;
+//     var nodeCount = 0;
 
-  if (sentences.length !== null) {
-    var indices = [];
+//     // save indices of ends of sentences
+//     // split current text node at current index
+//     for (var sentCount = 0; sentCount < sentences.length - 1; sentCount++) {
 
-    var fromStart = 0;
-    // save indices of ends of sentences
-    for (var j = 0; j < sentences.length - 1; j++) {
-      fromStart += sentences[j].length;
-      indices.push(fromStart);
-    }
+//       console.log('cutoff: ', cutoff);
+//       console.log('nodeCount: ', nodeCount);
+//       console.log('sentCount: ', sentCount);
+//       console.log('childNodes length: ', node.childNodes.length);
 
-    // iterate through node text backwards
-    // split text at indices
-    for (var j = indices.length; j > 0; j--) {
-      console.log(indices[j]);
-      console.log(node.firstChild.length);
-      node.firstChild.splitText(indices[j]);
-    }
+//       cutoff += sentences[sentCount].length;
+//       node.childNodes[nodeCount].splitText(cutoff);
 
-    var start = 0;
+//       nodeCount++;
+//     }
 
-    for (var i = 0; i < node.childNodes.length; i++) {
-      var newSpan = document.createElement('span');
-      var content = document.createTextNode(node.childNodes[i]);
-      newSpan.appendChild(content);
-      newSpan.style.color = getRandomColor();
-      node.replaceChild(newSpan, node.childNodes[i]);
-    }
-  } else {
-    node.style.color = getRandomColor();
-  }
-}
+//       // create span element
+//       // var newSpan = document.createElement('span');
+//       // var content = document.createTextNode(node.childNodes[j]);
+//       // newSpan.appendChild(content);
+//       // newSpan.style.color = getRandomColor();
+//       // node.replaceChild(newSpan, node.childNodes[j]);
+
+//     // save indices of ends of sentences
+//     // for (var j = 0; j < sentences.length - 1; j++) {
+//     //   fromStart += sentences[j].length;
+//     //   indices.push(fromStart);
+//     // }
+
+//     // iterate through node text backwards
+//     // split text at indices
+//     // for (var j = indices.length; j > 0; j--) {
+//     //   console.log(indices[j]);
+//     //   console.log(node.firstChild.length);
+//     //   node.firstChild.splitText(indices[j]);
+//     // }
+
+//     // var start = 0;
+
+//     // for (var i = 0; i < node.childNodes.length; i++) {
+//     //   var newSpan = document.createElement('span');
+//     //   var content = document.createTextNode(node.childNodes[i]);
+//     //   newSpan.appendChild(content);
+//     //   newSpan.style.color = getRandomColor();
+//     //   node.replaceChild(newSpan, node.childNodes[i]);
+//     // }
+
+    
+//   } else {
+//     node.style.color = getRandomColor();
+//   }
+// }
 
 // var regex = /[\w\d'\n;,:\=/_" ]+[\.?!]?(?!>)/g;
 
-var p = document.getElementsByTagName('p')[0]
-document.getElementsByTagName('p')[0].firstChild.splitText(10)
+// var p = document.getElementsByTagName('p')[0]
+// document.getElementsByTagName('p')[0].firstChild.splitText(10)
 
-for (var i = 0; i < p.childNodes.length; i++) {
-  var div = document.createElement('div');
-  var content = document.createTextNode(p.childNodes[i].textContent);
-  div.appendChild(content);
-  div.style.color = 'red';
-  p.replaceChild(div, p.childNodes[i]);
+// for (var i = 0; i < p.childNodes.length; i++) {
+//   var div = document.createElement('div');
+//   var content = document.createTextNode(p.childNodes[i].textContent);
+//   div.appendChild(content);
+//   div.style.color = 'red';
+//   p.replaceChild(div, p.childNodes[i]);
+// }
+
+var node = document.getElementsByTagName('p')[0];
+var regex = /[\.?!]+ /g;
+var sentences = node.innerText.split(regex);
+var indices = [];
+var cutoff = 0;
+var nodeCount = 0;
+
+// save indices of ends of sentences
+// split current text node at current index
+for (var sentCount = 0; sentCount < sentences.length; sentCount++) {
+
+  console.log('cutoff: ', cutoff);
+  console.log('nodeCount: ', nodeCount);
+  console.log('sentCount: ', sentCount);
+  console.log('childNodes length: ', node.childNodes.length);
+
+  cutoff = sentences[sentCount].length;
+  node.childNodes[nodeCount].splitText(cutoff);
+
+  var newSpan = document.createElement('span');
+  var content = document.createTextNode(node.childNodes[nodeCount].textContent);
+  newSpan.appendChild(content);
+  newSpan.style.color = getRandomColor();
+  node.replaceChild(newSpan, node.childNodes[nodeCount]);
+
+  nodeCount++;
 }
