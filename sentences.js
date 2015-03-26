@@ -9,10 +9,17 @@ function getRandomColor() {
   return color;
 }
 
+var elements = document.querySelectorAll('div', 'p', 'ul');
+
+// for (var i = 0; i < elements.length; i++) {
+//   if (elements[i].firstChild.nodeType)
+// }
+
 // Function for wrapping nodes in jason tags
 function wrapNodes(node) {
   // Keep running this script as long as we have nodes
   while (node !== null) {
+    console.log('node: ', node);
     // Split nodes at sentence breaks
     var sentences = node.innerText.split(regex);
 
@@ -23,34 +30,36 @@ function wrapNodes(node) {
       var cutoff = 0;
       var childNodeCount = 0;
 
-      // 
       for (var sentCount = 0; sentCount < sentences.length; sentCount++) {
         // save current child node
         var currentChildNode = node.childNodes[childNodeCount];
         console.log('cutoff: ', cutoff);
         console.log('childNodeCount: ', childNodeCount);
         console.log('sentCount: ', sentCount);
-        console.log('current childNode: ', currentChildNode);
-        console.log('current childNode type: ', currentChildNode.nodeType);
-        console.log(/\S/.test(currentChildNode.innerText));
 
-        if (currentChildNode.nodeType === 3 && /\S/.test(currentChildNode.innerText)) {
-          // set cutoff point to lenth of current sentence
+        if (currentChildNode !== undefined && currentChildNode.nodeType === 3) {
+          console.log('current childNode: ', currentChildNode);
+          // console.log('current childNode content: ', currentChildNode.innerText);
+          // console.log(/\S/.test(currentChildNode.innerText));
+
+          // set cutoff point to length of current sentence
           cutoff = sentences[sentCount].length;
 
-          // split current child node at cutoff point
-          currentChildNode.splitText(cutoff);
+          if (cutoff < currentChildNode.textContent.length) {
+            // split current child node at cutoff point
+            currentChildNode.splitText(cutoff);
 
-          // create span with text content of current child node
-          var newSpan = document.createElement('jason');
-          var content = document.createTextNode(currentChildNode.textContent);
-          newSpan.appendChild(content);
-          newSpan.style.color = getRandomColor();
+            // create span with text content of current child node
+            var newSpan = document.createElement('jason');
+            var content = document.createTextNode(currentChildNode.textContent);
+            newSpan.appendChild(content);
+            newSpan.style.color = getRandomColor();
 
-          console.log('newSpan: ', newSpan);
+            console.log('newSpan: ', newSpan);
 
-          // replace child node with new span
-          node.replaceChild(newSpan, currentChildNode);
+            // replace child node with new span
+            node.replaceChild(newSpan, currentChildNode);
+          }
         }
 
         // increment child count
@@ -83,7 +92,8 @@ var nodeIterator = document.createNodeIterator(
       // would add them to the list of nodes to traverse,
       // and as a result, we would have an infinite loop.)
       if (!/^\s*$/.test(node.data) && /\S/.test(node.innerText) &&
-        (node.tagName === "P" || node.tagName === "DIV")) {
+        (node.tagName === "P" || node.tagName === "DIV") &&
+        node.firstChild.nodeType === 3) {
         return NodeFilter.FILTER_ACCEPT;
       } else {
         return NodeFilter.FILTER_REJECT;
