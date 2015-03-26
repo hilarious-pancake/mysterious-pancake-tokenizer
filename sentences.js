@@ -9,93 +9,146 @@ function getRandomColor() {
   return color;
 }
 
-// var nodeIterator = document.createNodeIterator(
-//   // Node to use as root
-//   document.getElementsByTagName('body')[0],
+// Function for wrapping nodes in jason tags
+function wrapNodes(node) {
+  // Keep running this script as long as we have nodes
+  while (node !== null) {
+    // Split nodes at sentence breaks
+    var sentences = node.innerText.split(regex);
 
-//   // Only consider nodes that are text nodes (nodeType 3)
-//   NodeFilter.SHOW_ELEMENT,
+    // If we have at least one sentence
+    if (sentences.length) {
+      // Initialize cutoff point to zero
+      // and counter for child nodes to zero
+      var cutoff = 0;
+      var childNodeCount = 0;
 
-//   // Object containing the function to use for the acceptNode method
-//   // of the NodeFilter
-//     { acceptNode: function(node) {
-//       // Logic to determine whether to accept, reject or skip node
-//       // In this case, only accept nodes that have content
-//       // other than whitespace
-//       if ( ! /^\s*$/.test(node.data) ) {
-//         return NodeFilter.FILTER_ACCEPT;
-//       }
-//     }
-//   },
-//   false
-// );
+      // 
+      for (var sentCount = 0; sentCount < sentences.length; sentCount++) {
+        // save current child node
+        var currentChildNode = node.childNodes[childNodeCount];
+        console.log('cutoff: ', cutoff);
+        console.log('childNodeCount: ', childNodeCount);
+        console.log('sentCount: ', sentCount);
+        console.log('current childNode: ', currentChildNode);
+        console.log('current childNode type: ', currentChildNode.nodeType);
+        console.log(/\S/.test(currentChildNode.innerText));
 
-// // Show the content of every non-empty text node that is a child of root
+        if (currentChildNode.nodeType === 3 && /\S/.test(currentChildNode.innerText)) {
+          // set cutoff point to lenth of current sentence
+          cutoff = sentences[sentCount].length;
 
-// // var parser = new DOMParser();
-// var regex = /[\.?!]+ /g;
+          // split current child node at cutoff point
+          currentChildNode.splitText(cutoff);
 
-// while ((node = nodeIterator.nextNode())) {
-//   // split node text
-//   var sentences = node.innerText.split(regex);
+          // create span with text content of current child node
+          var newSpan = document.createElement('jason');
+          var content = document.createTextNode(currentChildNode.textContent);
+          newSpan.appendChild(content);
+          newSpan.style.color = getRandomColor();
 
-//   if (sentences.length !== null) {
-//     var indices = [];
-//     var cutoff = 0;
-//     var nodeCount = 0;
+          console.log('newSpan: ', newSpan);
 
-//     // save indices of ends of sentences
-//     // split current text node at current index
-//     for (var sentCount = 0; sentCount < sentences.length - 1; sentCount++) {
+          // replace child node with new span
+          node.replaceChild(newSpan, currentChildNode);
+        }
 
-//       console.log('cutoff: ', cutoff);
-//       console.log('nodeCount: ', nodeCount);
-//       console.log('sentCount: ', sentCount);
-//       console.log('childNodes length: ', node.childNodes.length);
+        // increment child count
+        childNodeCount++;
+      }
 
-//       cutoff += sentences[sentCount].length;
-//       node.childNodes[nodeCount].splitText(cutoff);
+    } else {
+      node.style.color = getRandomColor();
+    }
 
-//       nodeCount++;
-//     }
+    node = nodeIterator.nextNode();
+  }
+  
+}
 
-//       // create span element
-//       // var newSpan = document.createElement('span');
-//       // var content = document.createTextNode(node.childNodes[j]);
-//       // newSpan.appendChild(content);
-//       // newSpan.style.color = getRandomColor();
-//       // node.replaceChild(newSpan, node.childNodes[j]);
+var nodeIterator = document.createNodeIterator(
+  // Use body node as root
+  document.getElementsByTagName('body')[0],
 
-//     // save indices of ends of sentences
-//     // for (var j = 0; j < sentences.length - 1; j++) {
-//     //   fromStart += sentences[j].length;
-//     //   indices.push(fromStart);
-//     // }
+  // Only consider nodes that are element nodes
+  NodeFilter.SHOW_ELEMENT,
 
-//     // iterate through node text backwards
-//     // split text at indices
-//     // for (var j = indices.length; j > 0; j--) {
-//     //   console.log(indices[j]);
-//     //   console.log(node.firstChild.length);
-//     //   node.firstChild.splitText(indices[j]);
-//     // }
+  // Object containing the function to use for the acceptNode method
+  // of the NodeFilter
+    { acceptNode: function(node) {
+      // Only accept nodes that have content other than whitespace
+      // and do not have tags named body, script, or jason.
+      // Our script dynamically creates jason elements from existing text.
+      // (If we did not reject these elements, the NodeIterator
+      // would add them to the list of nodes to traverse,
+      // and as a result, we would have an infinite loop.)
+      if (!/^\s*$/.test(node.data) && /\S/.test(node.innerText) &&
+        (node.tagName === "P" || node.tagName === "DIV")) {
+        return NodeFilter.FILTER_ACCEPT;
+      } else {
+        return NodeFilter.FILTER_REJECT;
+      }
+    }
+  },
+  false
+);
 
-//     // var start = 0;
+// Regular expression for filtering sentences
+var regex = /[\.?!]+ /g;
 
-//     // for (var i = 0; i < node.childNodes.length; i++) {
-//     //   var newSpan = document.createElement('span');
-//     //   var content = document.createTextNode(node.childNodes[i]);
-//     //   newSpan.appendChild(content);
-//     //   newSpan.style.color = getRandomColor();
-//     //   node.replaceChild(newSpan, node.childNodes[i]);
-//     // }
+// Initialize node to the first node in our NodeIterator
+var startNode = nodeIterator.nextNode();
 
-    
-//   } else {
-//     node.style.color = getRandomColor();
-//   }
-// }
+// Call wrap nodes on startNode
+wrapNodes(startNode);
 
+
+    // save indices of ends of sentences
+    // split current text node at current index
+    // for (var sentCount = 0; sentCount < sentences.length - 1; sentCount++) {
+
+    //   console.log('cutoff: ', cutoff);
+    //   console.log('nodeCount: ', nodeCount);
+    //   console.log('sentCount: ', sentCount);
+    //   console.log('childNodes length: ', node.childNodes.length);
+
+    //   cutoff += sentences[sentCount].length;
+    //   node.childNodes[nodeCount].splitText(cutoff);
+
+    //   nodeCount++;
+    // }
+
+
+      // create span element
+      // var newSpan = document.createElement('span');
+      // var content = document.createTextNode(node.childNodes[j]);
+      // newSpan.appendChild(content);
+      // newSpan.style.color = getRandomColor();
+      // node.replaceChild(newSpan, node.childNodes[j]);
+
+    // save indices of ends of sentences
+    // for (var j = 0; j < sentences.length - 1; j++) {
+    //   fromStart += sentences[j].length;
+    //   indices.push(fromStart);
+    // }
+
+    // iterate through node text backwards
+    // split text at indices
+    // for (var j = indices.length; j > 0; j--) {
+    //   console.log(indices[j]);
+    //   console.log(node.firstChild.length);
+    //   node.firstChild.splitText(indices[j]);
+    // }
+
+    // var start = 0;
+
+    // for (var i = 0; i < node.childNodes.length; i++) {
+    //   var newSpan = document.createElement('span');
+    //   var content = document.createTextNode(node.childNodes[i]);
+    //   newSpan.appendChild(content);
+    //   newSpan.style.color = getRandomColor();
+    //   node.replaceChild(newSpan, node.childNodes[i]);
+    // }
 // var regex = /[\w\d'\n;,:\=/_" ]+[\.?!]?(?!>)/g;
 
 // var p = document.getElementsByTagName('p')[0]
@@ -109,30 +162,30 @@ function getRandomColor() {
 //   p.replaceChild(div, p.childNodes[i]);
 // }
 
-var node = document.getElementsByTagName('p')[0];
-var regex = /[\.?!]+ /g;
-var sentences = node.innerText.split(regex);
-var indices = [];
-var cutoff = 0;
-var nodeCount = 0;
+// var node = document.getElementsByTagName('p')[0];
+// var regex = /[\.?!]+ /g;
+// var sentences = node.innerText.split(regex);
+// var indices = [];
+// var cutoff = 0;
+// var nodeCount = 0;
 
-// save indices of ends of sentences
-// split current text node at current index
-for (var sentCount = 0; sentCount < sentences.length; sentCount++) {
+// // save indices of ends of sentences
+// // split current text node at current index
+// for (var sentCount = 0; sentCount < sentences.length; sentCount++) {
 
-  console.log('cutoff: ', cutoff);
-  console.log('nodeCount: ', nodeCount);
-  console.log('sentCount: ', sentCount);
-  console.log('childNodes length: ', node.childNodes.length);
+//   console.log('cutoff: ', cutoff);
+//   console.log('nodeCount: ', nodeCount);
+//   console.log('sentCount: ', sentCount);
+//   console.log('childNodes length: ', node.childNodes.length);
 
-  cutoff = sentences[sentCount].length;
-  node.childNodes[nodeCount].splitText(cutoff);
+//   cutoff = sentences[sentCount].length;
+//   node.childNodes[nodeCount].splitText(cutoff);
 
-  var newSpan = document.createElement('span');
-  var content = document.createTextNode(node.childNodes[nodeCount].textContent);
-  newSpan.appendChild(content);
-  newSpan.style.color = getRandomColor();
-  node.replaceChild(newSpan, node.childNodes[nodeCount]);
+//   var newSpan = document.createElement('span');
+//   var content = document.createTextNode(node.childNodes[nodeCount].textContent);
+//   newSpan.appendChild(content);
+//   newSpan.style.color = getRandomColor();
+//   node.replaceChild(newSpan, node.childNodes[nodeCount]);
 
-  nodeCount++;
-}
+//   nodeCount++;
+// }
